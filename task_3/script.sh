@@ -1,0 +1,1 @@
+docker cp ./IOT-temp.csv a48ec9a63ea0634d0260be4cc308afea7427e6c46325e449b250a689fef21846:/opt/nifi/nifi-current/data/hw_3.csv
