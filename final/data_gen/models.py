@@ -45,19 +45,19 @@ class BaseFakeGenClass:
 				for key in self.fields:
 					val = item[key]
 					if type(val) is str:
-						_insert_data += f''{val}','
+						_insert_data += f"'{val}',"
 					elif type(val) is dt or type(val) is date:
-						_insert_data += f''{val.strftime('%Y-%m-%d')}','
+						_insert_data += f"'{val.strftime('%Y-%m-%d')}',"
 					else:
 						_insert_data += f'{val},'
 				_insert_data = f'({_insert_data[:-1]}),'
 				data_to_insert +=_insert_data
 			data_to_insert = data_to_insert[:-1]
 
-			print(f'INSERT INTO '{self.model_name}' ({_columns}) VALUES {data_to_insert}')
+			print(f"INSERT INTO '{self.model_name}' ({_columns}) VALUES {data_to_insert}")
 			cur.execute(
-				f'INSERT INTO '{self.model_name}' ({_columns}) VALUES {data_to_insert}'
-				f'RETURNING {self.colum_id}'
+				f"INSERT INTO '{self.model_name}' ({_columns}) VALUES {data_to_insert}"
+				f"RETURNING {self.colum_id}"
 			)
 			result_ids += [val[0] for val in cur.fetchall()]
 		print(result_ids)
@@ -88,7 +88,7 @@ class User(BaseFakeGenClass):
 class UserSession(BaseFakeGenClass):
 	def __init__(self, user_ids) -> None:
 		self.fields = ('user_id', 'start_time', 'end_time', 'pages_visited', 'device', 'actions',)
-		self.model_name = 'UserSessions'
+		self.model_name = 'UserSession'
 		self.colum_id = 'session_id'
 		self._user_ids = user_ids
 		self._actions = {
@@ -155,58 +155,10 @@ class UserSession(BaseFakeGenClass):
 			item['end_time'] += timedelta(minutes=random.randint(1, 30))
 
 		return result
-# UserSessions, сессии пользователей:
-# ·	session_id — уникальный идентификатор сессии;
-# ·	user_id — идентификатор пользователя;
-# ·	start_time — время начала сессии;
-# ·	end_time — время завершения сессии;
-# ·	pages_visited — массив посещённых страниц;
-# ·	device — информация об устройстве;
-# ·	actions — массив действий пользователя.
-
-
-
-class ProductCategories(BaseFakeGenClass):
-	def __init__(self) -> None:
-		self.fields = ('name',)
-		self.model_name = 'ProductCategories'
-		self.colum_id = 'category_id'
-		super().__init__()
-
-	def _prepared_gen(self):
-		_base_categories = [
-			'Home Appliances',
-			'Fashion',
-			'Beauty Products',
-			'Sports Gear',
-			'Electronics',
-			'Books',
-			'Toys',
-			'Automotive Accessories',
-			'Gardening Supplies',
-			'Health'
-		]
-
-		return [{'name': category} for category in _base_categories]
-
-class ProductCategoriesWithParent(BaseFakeGenClass):
-	def __init__(self, categories_ids) -> None:
-		self.fields = ('name', 'parent_category_id')
-		self._categories_ids = categories_ids
-		self.model_name = 'ProductCategories'
-		self.colum_id = 'category_id'
-		super().__init__()
-
-	def name_gen_func(self):
-		return self._fake.words(nb=1)[0]
-
-	def parent_category_id_gen_func(self):
-		return random.choice(self._categories_ids)
 
 class Product(BaseFakeGenClass):
-	def __init__(self, categories_ids) -> None:
-		self.fields = ('name', 'description', 'category_id', 'price', 'stock_quantity', 'creation_date',)
-		self._categories_ids = categories_ids
+	def __init__(self) -> None:
+		self.fields = ('name', 'description', 'stock_quantity', 'creation_date',)
 		self.model_name = 'Products'
 		self.colum_id = 'product_id'
 		super().__init__()
@@ -217,18 +169,103 @@ class Product(BaseFakeGenClass):
 	def description_gen_func(self):
 		return self._fake.text(500)
 
-	def category_id_gen_func(self):
-		return random.choice(self._categories_ids)
-
-	def price_gen_func(self):
-		return round(random.uniform(10.0, 10000.0), 2)
-
 	def stock_quantity_gen_func(self):
 		return random.randint(1, 10000)
 
 	def creation_date_gen_func(self):
 		return self._fake.date_time_between(start_date=date(2023, 1, 1), end_date=date(2023, 6, 10))
 
+
+class ProductPriceHistory(BaseFakeGenClass):
+	def __init__(self, product_ids) -> None:
+		self.fields = ('product_id', 'price_changes', 'current_price', 'currency',)
+		self.model_name = 'ProductPriceHistory'
+		self.colum_id = 'product_history_id'
+		self._product_ids = product_ids
+		super().__init__()
+
+	def product_id_gen_func(self):
+		if (self._product_ids):
+			product_id = random.choice(self._product_ids)
+			self._product_ids.remove(product_id) # мутировать плохо! но мы аккуратно
+			return product_id 
+
+		raise Exception('Товаров нет')
+
+	def price_changes_gen_func(self):
+		start_date = dt.now() - timedelta(365) 
+
+		return [{
+			'price' : i + random.randint(100, 1000),
+			'date' : start_date -  timedelta(18 * i)
+		} for i in range(1, random.randint(5, 20))]
+
+	def current_price_gen_func(self):
+		return random.randint(1, 10000)
+
+	def currency_gen_func(self):
+		return 'RUB'
+
+# SupportTickets, обращения в поддержку:
+# ·	ticket_id — уникальный идентификатор тикета;
+# ·	user_id — идентификатор пользователя;
+# ·	status — статус тикета;
+# ·	issue_type — тип проблемы;
+# ·	messages — массив сообщений;
+# ·	created_at — время создания тикета;
+# ·	updated_at — время последнего обновления.
+
+
+class SupportTickets(BaseFakeGenClass):
+	def __init__(self, user_ids) -> None:
+		self.fields = ('user_id', 'status', 'issue_type', 'messages', 'created_at', 'updated_at', 'end_date')
+		self.model_name = 'SupportTickets'
+		self.colum_id = 'ticket_id'
+		self._user_ids = user_ids
+		self._statuses = ['New', 'InWork', 'Closed']
+		self._types = [
+			'delivery_issue',
+			'missing_item',
+			'damaged_product',
+			'order_error',
+			'return_inquiry',
+			'promo_code_issue',
+			'order_cancellation',
+			'warranty_question',
+			'payment_problem',
+    		'product_consultation'
+		]
+		super().__init__()
+
+	def user_id_gen_func(self):
+		return random.choices(self._user_id)
+
+	def status_gen_func(self):
+		return random.choices(self._statuses)
+
+	def issue_type_gen_func(self):
+		return random.randint(1, 10000)
+
+	def messages_at_gen_func(self):
+		return [ self._fake.text(50) for _ in range(1, 20)]
+
+	def created_at_gen_func(self):
+		return dt.now() - timedelta(365) + timedelta(random.randint(1, 15))
+
+	def end_date_gen_func(self):
+		return None
+
+	def updated_at_gen_func(self):
+		return None
+
+	def _after_gen(self, result, *args, **kwargs):
+		for item in result:
+			if item['status'] == 'Closed':
+				item['end_date'] = item['created_at'] + timedelta(days=random.randint(3, 6))
+
+			item['updated_at'] = item['created_at'] + timedelta(2)
+
+		return result
 
 class Order(BaseFakeGenClass):
 	def __init__(self, user_ids) -> None:
