@@ -206,15 +206,6 @@ class ProductPriceHistory(BaseFakeGenClass):
 	def currency_gen_func(self):
 		return 'RUB'
 
-# SupportTickets, обращения в поддержку:
-# ·	ticket_id — уникальный идентификатор тикета;
-# ·	user_id — идентификатор пользователя;
-# ·	status — статус тикета;
-# ·	issue_type — тип проблемы;
-# ·	messages — массив сообщений;
-# ·	created_at — время создания тикета;
-# ·	updated_at — время последнего обновления.
-
 
 class SupportTickets(BaseFakeGenClass):
 	def __init__(self, user_ids) -> None:
@@ -267,68 +258,147 @@ class SupportTickets(BaseFakeGenClass):
 
 		return result
 
-class Order(BaseFakeGenClass):
-	def __init__(self, user_ids) -> None:
-		self.fields = ('user_id',  'order_date', 'total_amount', 'status', 'delivery_date',)
-		self._user_ids = user_ids
-		self.model_name = 'Orders'
-		self.colum_id = 'order_id'
-		super().__init__()
-  
-	def _after_gen(self, result, *args, **kwargs):
-		for item in result:
-			if item['status'] == 'Completed':
-				item['delivery_date'] = item['order_date'] + timedelta(days=random.randint(3, 6))
-			else:
-				item['delivery_date'] = dt.now().date() + timedelta(days=random.randint(6, 8))
 
-		return result
+class UserRecommendations(BaseFakeGenClass):
+	def __init__(self, user_ids, product_ids) -> None:
+		self.fields = ('recommended_products', 'last_updated',)
+		self.model_name = 'UserRecommendations'
+		self.colum_id = 'recom_id'
+		self._user_ids = user_ids
+		self._product_ids = product_ids
+		super().__init__()
+
+	def recommended_products_gen_func(self):
+		return random.sample(self._product_ids, 10)
+
+	def last_updated_gen_func(self):
+		return dt.now() - timedelta(180) + timedelta(random.randint(1, 15))
+
+
+class SearchQueries(BaseFakeGenClass):
+	def __init__(self, user_ids, product_names) -> None:
+		self.fields = ('user_id', 'query_text', 'timestamp', 'filters', 'results_count', )
+		self.model_name = 'SearchQueries'
+		self.colum_id = 'query_id'
+		self._user_ids = user_ids
+		self._product_names = product_names
+		self._filters = [
+			'low_price',
+			'with_feedback',
+			'max_rating',
+			'discount',
+			'shipping_options'
+		]
+		super().__init__()
 
 	def user_id_gen_func(self):
 		return random.choice(self._user_ids)
 
-	def order_date_gen_func(self):
-		return self._fake.date_time_between(start_date=date(2023, 7, 1), end_date=date(2025, 1, 1))
+	def query_text_gen_func(self):
+		return self._fake.text(20) + random.choice(self._product_names)[:10]
 
-	def total_amount_gen_func(self):
-		return 0 # его надо пересчитывать уже на готовом заказе
+	def last_updated_gen_func(self):
+		return dt.now() - timedelta(180) + timedelta(random.randint(1, 15))
 
-	def status_gen_func(self):
-		return random.choice(('Paid', 'Delivery', 'Completed',))
+	def timestamp_gen_func(self):
+		return random.randint(30, 3000) # ms
 
-	def delivery_date_gen_func(self):
-		return date(2024, 1, 1) # зависит от параметра статус заказ, генерируется позже
+	def filters_gen_func(self):
+		return random.sample(self._filters, 2)
+
+	def results_count_gen_func(self):
+		return random.randint(5, len(self._product_names))
 
 
-class OrderDetails(BaseFakeGenClass):
-	def __init__(self, order_ids, product_data) -> None:
-		self.fields = ('order_id',  'product_id', 'quantity', 'price_per_unit', 'total_price', )
-		self._order_ids = order_ids
-		self._product_data = product_data
-		self._product_ids = [key for key in product_data]
+class EventLogs(BaseFakeGenClass):
+	def __init__(self, user_ids) -> None:
+		self.fields = ('event_id', 'timestamp', 'event_type', 'details',)
+		self.model_name = 'SearchQueries'
+		self.colum_id = 'query_id'
+		self._user_ids = user_ids
+		self._server_event_types = [
+			'server_error',
+			'server_overload',
+			'server_database_connection_error',
+			'server_security_alert',
+			'server_api_rate_limit_exceeded',
+			'server_backup_failed',
+			'server_cron_job_failed',
+			'server_health_check'
+		]
 		super().__init__()
-		self.model_name = 'OrderDetails'
-		self.colum_id = 'order_detail_id'
-	
-	def _after_gen(self, result, *args, **kwargs):
-		for item in result:
-			product_info = self._product_data[item['product_id']]
-			item['price_per_unit'] = product_info['price']
-			item['total_price'] = item['price_per_unit'] * item['quantity']
 
-		return result
+	def timestamp_gen_func(self):
+		return dt.now() - timedelta(180) + timedelta(random.randint(1, 180))
 
-	def order_id_gen_func(self):
-		return random.choice(self._order_ids)
+	def event_type_gen_func(self):
+		return random.sample(self._server_event_types, 1)
+
+	def details_gen_func(self):
+		return {
+			'user': random.choice(self._user_ids),
+			'description': self._fake.text(30)
+		}
+
+
+
+# ModerationQueue, очередь модерации отзывов:
+# ·	review_id — идентификатор отзыва;
+# ·	user_id — идентификатор пользователя;
+# ·	product_id — идентификатор товара;
+# ·	review_text — текст отзыва;
+# ·	rating — оценка;
+# ·	moderation_status — статус модерации;
+# ·	flags — массив флагов;
+# ·	submitted_at — время, когда был оставлен отзыв.
+
+
+class ModerationQueue(BaseFakeGenClass):
+	def __init__(self, user_ids, product_ids) -> None:
+		self.fields = ('user_id', 'product_id', 'review_text', 'rating', 'moderation_status', 'flags', 'submitted_at', 'review_end')
+		self.model_name = 'SearchQueries'
+		self.colum_id = 'review_id'
+		self._user_ids = user_ids
+		self._product_ids = product_ids
+		self._statuses = ['New', 'InWork', 'Success', 'Broken']
+
+		super().__init__()
+
+	def user_id_gen_func(self):
+		return random.choice(self._user_ids)
 
 	def product_id_gen_func(self):
-		return random.choice(self._product_ids)
+		return random.choice(self._user_ids)
 
-	def quantity_gen_func(self):
-		return random.randint(1, 5)
+	def review_text_gen_func(self):
+		return self._fake.text(random.randint(100, 200))
 
-	def price_per_unit_gen_func(self):
-		return 0 # рассчитывается позже
+	def rating_gen_func(self):
+		return random.choice([1, 2, 3, 4, 5])
+	
+	def moderation_status_gen_func(self):
+		return random.choice(self._statuses)
+	
+	def submitted_at_gen_func(self):
+		return dt.now() - timedelta(180) + timedelta(random.randint(1, 180))
+	
+	def review_end_gen_func(self):
+		return None
 
-	def total_price_gen_func(self):
-		return 0 # рассчитывается позже
+	def user_id_gen_func(self):
+		return random.choice(self._user_ids)
+
+	def _after_gen(self, result, *args, **kwargs):
+		user_product = set()
+		new_result = []
+
+		for item in result:
+			if item['status'] in ('Success', 'Broken'):
+				item['review_end'] = item['submitted_at'] + timedelta(hours=random.randint(1, 6))
+
+			val = item['user_id'] + '_' + item['product_id']
+			if val not in user_product:
+				user_product.add(val)
+				new_result.append(item)
+
+		return new_result
