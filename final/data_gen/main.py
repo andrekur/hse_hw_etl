@@ -1,68 +1,57 @@
 from models import (
-  User, ProductCategories, ProductCategoriesWithParent, Product, Order, OrderDetails
-)
-from cursor import DatabaseCursor
-
-from dotenv import dotenv_values
-
-
-CONFIG = dotenv_values('./.env')
-
-CONNECTION = DatabaseCursor(
-	2,
-	10,
-	user=CONFIG['DB_POSTGRES_USER'],
-	password=CONFIG['DB_POSTGRES_PASSWORD'],
-	host=CONFIG['DB_POSTGRES_HOST'],
-	port=CONFIG['DB_POSTGRES_PORT'],
-	database=CONFIG['DB_POSTGRES_NAME_DB']
+  User, UserSession, Product, ProductPriceHistory, SupportTickets, UserRecommendations, SearchQueries,
+  EventLogs, ModerationQueue
 )
 
-COUNT_USERS = int(CONFIG['DATA_GEN_COUNT_USERS'])
-COUNT_PRODUCTS = int(CONFIG['DATA_GEN_COUNT_PRODUCTS'])
-CATEGORIES_WITH_PARENTS = int(CONFIG['DATA_GEN_COUNT_CATEGORIES_WITH_PARENTS'])
-COUNT_ORDERS = int(CONFIG['DATA_GEN_COUNT_ORDERS'])
-ORDER_DETAILS = int(CONFIG['DATA_GEN_COUNT_ORDER_DETAILS'])
+from pymongo import MongoClient
 
 
 if __name__ == '__main__':
-	with (
-		CONNECTION._get_conn() as conn,
-		conn.cursor() as cur
-	):
-		try:
-			user = User()
-			user_result = user.gen_data(COUNT_USERS)
-			user_ids = user.insert_in_db(cur, user_result)
+	client = MongoClient("mongodb://localhost:27018/") # TODO env
 
-			pc = ProductCategories()
-			pc_result = pc.gen_data()
-			pc_ids = pc.insert_in_db(cur, pc_result)
+	db = client['shop']
 
-			pcp = ProductCategoriesWithParent(pc_ids)
-			pcp_result = pcp.gen_data(CATEGORIES_WITH_PARENTS)
-			pcp_ids = pcp.insert_in_db(cur, pcp_result)
+	user_collection = db['User']
+	user = User()
+	user_result = user.gen_data(1000)
+	user_ids = user_collection.insert_many(user_result).inserted_ids
 
-			products = Product([*pc_ids, *pcp_ids])
-			products_result = products.gen_data(COUNT_PRODUCTS)
-			products_ids = products.insert_in_db(cur, products_result)
+	u_s_collection = db['UserSession']
+	user_session = UserSession(user_ids)
+	session_result = user_session.gen_data(2000)
+	session_ids = u_s_collection.insert_many(session_result)
 
-			orders = Order(user_ids)
-			orders_result = orders.gen_data(COUNT_ORDERS)
-			orders_ids = orders.insert_in_db(cur, orders_result)
+	product_collection = db['Product']
+	product = Product()
+	product_result = product.gen_data(200)
+	product_ids = product_collection.insert_many(product_result).inserted_ids
 
-			prepared_product_data = {key:val for key, val in zip(products_ids, products_result )}
-			od = OrderDetails(orders_ids, prepared_product_data)
-			od_result = od.gen_data(ORDER_DETAILS)
-			od_ids = od.insert_in_db(cur, od_result)
+	product_p_h_collection = db['ProductPriceHistory']
+	product_p_h = ProductPriceHistory(product_ids.copy())
+	product_p_h_result = product_p_h.gen_data(200)
+	product_p_h_ids = product_p_h_collection.insert_many(product_p_h_result).inserted_ids
 
-			conn.commit()
-			cur.execute('select order_id, sum(total_price) from "OrderDetails" od group by order_id')
-			for order_id, total_amount in cur.fetchall():
-				cur.execute(f'UPDATE "Orders" set total_amount = {total_amount} where order_id={order_id}')
-			conn.commit()
-			cur.execute(f'DELETE FROM "Orders" where total_amount = 0')
-			conn.commit()
-		except Exception as e:
-			conn.rollback()
-			print(f'Error executing query: {e}')
+	support_tickets_collection = db['SupportTickets']
+	support_tickets = SupportTickets(user_ids)
+	support_tickets_result = support_tickets.gen_data(3000)
+	support_tickets_ids = support_tickets_collection.insert_many(support_tickets_result).inserted_ids
+
+	user_recomm_collection = db['UserRecommendations']
+	user_recomm = UserRecommendations(user_ids, product_ids)
+	user_recomm_result = user_recomm.gen_data(2000)
+	user_recomm_ids = user_recomm_collection.insert_many(user_recomm_result).inserted_ids
+
+	search_q_collection = db['SearchQueries']
+	search_q = SearchQueries(user_ids, tuple(item['name'] for item in product_result))
+	search_q_result = search_q.gen_data(2000)
+	search_q_ids = search_q_collection.insert_many(search_q_result).inserted_ids
+
+	event_logs_collection = db['EventLogs']
+	event_logs = EventLogs(user_ids)
+	event_logs_result = event_logs.gen_data(2000)
+	event_logs_ids = event_logs_collection.insert_many(event_logs_result).inserted_ids
+
+	moderation_queue_collection = db['ModerationQueue']
+	moderation_queue = ModerationQueue(user_ids, product_ids)
+	moderation_queue_result = moderation_queue.gen_data(2000)
+	moderation_queue_ids = moderation_queue_collection.insert_many(moderation_queue_result).inserted_ids

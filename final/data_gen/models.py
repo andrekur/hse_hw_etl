@@ -65,7 +65,7 @@ class BaseFakeGenClass:
 
 class User(BaseFakeGenClass):
 	def __init__(self) -> None:
-		self.fields = ('first_name', 'last_name', 'email', 'phone', 'registration_date', 'loyalty_status',)
+		self.fields = ('first_name', 'last_name', 'email', 'phone', 'registration_date', )
 		self.model_name = 'Users'
 		self.colum_id = 'user_id'
 		super().__init__()
@@ -91,7 +91,7 @@ class UserSession(BaseFakeGenClass):
 		self.model_name = 'UserSession'
 		self.colum_id = 'session_id'
 		self._user_ids = user_ids
-		self._actions = {
+		self._actions = (
 			'view_product_details',
 			'add_to_cart',
 			'remove_from_cart',
@@ -102,8 +102,8 @@ class UserSession(BaseFakeGenClass):
 			'write_product_review',
 			'track_order_status',
 			'contact_customer_support'
-		}
-		self._phones = {
+		)
+		self._phones = (
 			'Apple',
 			'Samsung',
 			'Xiaomi',
@@ -114,13 +114,13 @@ class UserSession(BaseFakeGenClass):
 			'Google',
 			'Sony',
 			'Nokia'
-		}
-		self._devices = {
+		)
+		self._devices = (
 			'Windows',
 			'Linux',
 			'MacOS'
-		}
-		self._pages = {
+		)
+		self._pages = (
 			'/catalog',
 			'/product',
 			'/cart',
@@ -130,7 +130,7 @@ class UserSession(BaseFakeGenClass):
 			'/account/orders',
 			'/search',
 			'/info/delivery'
-		}
+		)
 		super().__init__()
 	
 	def user_id_gen_func(self):
@@ -138,21 +138,24 @@ class UserSession(BaseFakeGenClass):
 
 	def start_time_gen_func(self):
 		return self._fake.date_time_between(start_date=date(2022, 1, 1), end_date=date(2023, 1, 1))
+	
+	def end_time_gen_func(self):
+		return None
 
-	def pages_visited_gen_fun(self):
+	def pages_visited_gen_func(self):
 		return random.sample(self._actions, random.randint(2, 6))
 
-	def device_gen_fun(self):
+	def device_gen_func(self):
 		if random.randint(0, 1):
-			return random.sample(self._devices, 1)
-		return random.sample(self._phones, 1) + ' ' + str(random.randint(5, 10))
+			return random.choice(self._devices)
+		return random.choice(self._phones) + ' ' + str(random.randint(5, 10))
 
-	def actions_gen_fun(self):
+	def actions_gen_func(self):
 		return random.sample(self._actions, random.randint(2, 6))
 
 	def _after_gen(self, result, *args, **kwargs):
 		for item in result:
-			item['end_time'] += timedelta(minutes=random.randint(1, 30))
+			item['end_time'] = item['start_time'] + timedelta(minutes=random.randint(1, 30))
 
 		return result
 
@@ -187,7 +190,7 @@ class ProductPriceHistory(BaseFakeGenClass):
 	def product_id_gen_func(self):
 		if (self._product_ids):
 			product_id = random.choice(self._product_ids)
-			self._product_ids.remove(product_id) # мутировать плохо! но мы аккуратно
+			self._product_ids.remove(product_id) # плохо! но мы аккуратно
 			return product_id 
 
 		raise Exception('Товаров нет')
@@ -197,7 +200,7 @@ class ProductPriceHistory(BaseFakeGenClass):
 
 		return [{
 			'price' : i + random.randint(100, 1000),
-			'date' : start_date -  timedelta(18 * i)
+			'date' : start_date + timedelta(18 * i)
 		} for i in range(1, random.randint(5, 20))]
 
 	def current_price_gen_func(self):
@@ -229,7 +232,7 @@ class SupportTickets(BaseFakeGenClass):
 		super().__init__()
 
 	def user_id_gen_func(self):
-		return random.choices(self._user_id)
+		return random.choices(self._user_ids)
 
 	def status_gen_func(self):
 		return random.choices(self._statuses)
@@ -237,8 +240,8 @@ class SupportTickets(BaseFakeGenClass):
 	def issue_type_gen_func(self):
 		return random.randint(1, 10000)
 
-	def messages_at_gen_func(self):
-		return [ self._fake.text(50) for _ in range(1, 20)]
+	def messages_gen_func(self):
+		return [self._fake.text(50) for _ in range(1, 20)]
 
 	def created_at_gen_func(self):
 		return dt.now() - timedelta(365) + timedelta(random.randint(1, 15))
@@ -312,9 +315,9 @@ class SearchQueries(BaseFakeGenClass):
 
 class EventLogs(BaseFakeGenClass):
 	def __init__(self, user_ids) -> None:
-		self.fields = ('event_id', 'timestamp', 'event_type', 'details',)
+		self.fields = ('timestamp', 'event_type', 'details',)
 		self.model_name = 'SearchQueries'
-		self.colum_id = 'query_id'
+		self.colum_id = 'log_id'
 		self._user_ids = user_ids
 		self._server_event_types = [
 			'server_error',
@@ -341,21 +344,9 @@ class EventLogs(BaseFakeGenClass):
 		}
 
 
-
-# ModerationQueue, очередь модерации отзывов:
-# ·	review_id — идентификатор отзыва;
-# ·	user_id — идентификатор пользователя;
-# ·	product_id — идентификатор товара;
-# ·	review_text — текст отзыва;
-# ·	rating — оценка;
-# ·	moderation_status — статус модерации;
-# ·	flags — массив флагов;
-# ·	submitted_at — время, когда был оставлен отзыв.
-
-
 class ModerationQueue(BaseFakeGenClass):
 	def __init__(self, user_ids, product_ids) -> None:
-		self.fields = ('user_id', 'product_id', 'review_text', 'rating', 'moderation_status', 'flags', 'submitted_at', 'review_end')
+		self.fields = ('user_id', 'product_id', 'review_text', 'rating', 'moderation_status', 'submitted_at', 'review_end')
 		self.model_name = 'SearchQueries'
 		self.colum_id = 'review_id'
 		self._user_ids = user_ids
@@ -393,10 +384,10 @@ class ModerationQueue(BaseFakeGenClass):
 		new_result = []
 
 		for item in result:
-			if item['status'] in ('Success', 'Broken'):
+			if item['moderation_status'] in ('Success', 'Broken'):
 				item['review_end'] = item['submitted_at'] + timedelta(hours=random.randint(1, 6))
 
-			val = item['user_id'] + '_' + item['product_id']
+			val = str(item['user_id']) + '_' + str(item['product_id'])
 			if val not in user_product:
 				user_product.add(val)
 				new_result.append(item)
