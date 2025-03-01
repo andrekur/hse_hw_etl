@@ -12,6 +12,7 @@ port = 27017
 
 # TODO .env
 uri = f"mongodb://{username}:{password}@{host}:{port}/"
+# uri = f"mongodb://root:example@mongo_app:27017/"
 
 
 if __name__ == '__main__':

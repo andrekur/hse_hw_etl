@@ -1,28 +1,43 @@
 import sys
 
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
 from dotenv import dotenv_values
 
 from db_conn_conf import ConnectionConfig
 
 CONFIG = dotenv_values('.env')
 
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DateType
+
+# Указываем схему вручную
+schema = StructType([
+	StructField("_id", StringType(), True),
+    StructField("first_name", StringType(), True),
+    StructField("last_name", StringType(), True),
+	StructField("email", StringType(), True),
+	StructField("registration_date", DateType(), True)
+])
 
 # TODO вынести в общую функцию репликации
 def replicate(from_db, to_db):
 	spark = SparkSession.builder \
 		.appName('ReplicateData') \
-		.config('spark.jars', '/opt/airflow/spark/jars/postgresql-42.2.18.jar,/opt/airflow/spark/jars/mongo-spark-connector_2.13-10.4.1.jar,/opt/airflow/spark/jars/mongodb-driver-sync-4.10.2.jar') \
+		.config('spark.jars', '/opt/airflow/spark/jars/mongo-spark-connector_2.12-3.0.1-assembly.jar,\
+			/opt/airflow/spark/jars/postgresql-42.2.18.jar') \
+		.config("spark.mongodb.input.uri", "mongodb://root:example@db_mongo:27017/shop.Users?authSource=admin") \
+    	.config("spark.mongodb.input.sampleSize", 100000) \
 		.getOrCreate()
 
 	df = spark.read \
-		.format('mongodb') \
-		.option('url', from_db.conn_url) \
-		.option('dbtable', from_db.table) \
-		.option('user', from_db.user['login']) \
-		.option('password', from_db.user['passwd']) \
+		.format('mongo') \
 		.load()
 
+		# .option('database', 'shop') \
+		# .option('collection', from_db.table) \
+
+	df.show()
+	df = df.withColumn("_id", col("_id.oid"))
 	df.write \
 		.format('jdbc') \
 		.option('url', to_db.conn_url) \

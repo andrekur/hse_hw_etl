@@ -14,12 +14,11 @@ RUN export JAVA_HOME
 
 RUN mkdir -p /opt/airflow/spark/jars
 
-RUN curl -o /opt/airflow/spark/jars/mongo-spark-connector_2.13-10.4.1.jar https://repo1.maven.org/maven2/org/mongodb/spark/mongo-spark-connector_2.13/10.4.1/mongo-spark-connector_2.13-10.4.1.jar && \
-    curl -o /opt/airflow/spark/jars/mongodb-driver-sync-4.10.2.jar https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-sync/4.10.2/mongodb-driver-sync-4.10.2.jar
+RUN curl -o /opt/airflow/spark/jars/mongo-spark-connector_2.12-3.0.1-assembly.jar \
+https://repo1.maven.org/maven2/org/mongodb/spark/mongo-spark-connector_2.12/3.0.1/mongo-spark-connector_2.12-3.0.1-assembly.jar
 
-RUN curl -o /opt/airflow/spark/jars/postgresql-42.2.18.jar https://jdbc.postgresql.org/download/postgresql-42.2.18.jar && \
-    curl -o /opt/airflow/spark/jars/mysql-connector-java-8.3.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.3.0/mysql-connector-j-8.3.0.jar
-
+RUN curl -o /opt/airflow/spark/jars/postgresql-42.2.18.jar \
+https://jdbc.postgresql.org/download/postgresql-42.2.18.jar
 
 COPY ./_CI/airflow/scheduler/requirements.txt requirements.txt
 COPY .env .env

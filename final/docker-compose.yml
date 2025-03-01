@@ -1,4 +1,4 @@
-name: python-final
+name: ETL-final
 
 x-airflow-common:
   &airflow-common
@@ -88,7 +88,7 @@ services:
       - airflow-init
 
   spark:
-    image: bitnami/spark:3.5.3
+    image: bitnami/spark:3.2.4
     restart: always
     environment:
       - SPARK_MODE=master
@@ -98,7 +98,7 @@ services:
     <<: *common-volumes
 
   spark-worker:
-    image: bitnami/spark:3.5.3
+    image: bitnami/spark:3.2.4
     restart: always
     environment:
       - SPARK_MODE=worker
