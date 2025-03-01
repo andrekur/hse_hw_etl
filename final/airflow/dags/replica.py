@@ -25,13 +25,13 @@ with DAG(
     for table in tables:
         spark_submit_task = SparkSubmitOperator(
             task_id=f'replicate_{table}',
-            application='/opt/airflow/scripts/replicate_table.py',
+            application='./scripts/replicate_table.py',
             conn_id='spark_app',
             application_args=[
                 table
             ],
             # conf=DEFAULT_SPARK_SUBMIT_CONF,
-            # jars=JARS
+            jars=JARS
         )
 
         start >> spark_submit_task >> finish

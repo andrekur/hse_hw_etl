@@ -16,4 +16,4 @@ DEFAULT_SPARK_SUBMIT_CONF = {
 	'spark.executor.memory': '600m'
 }
 
-JARS = '/opt/airflow/spark/jars/postgresql-42.2.18.jar,/opt/airflow/spark/jars/mongo-spark-connector_2.12-3.0.1-assembly.jar'
+JARS = './spark/jars/postgresql-42.2.18.jar,./spark/jars/mongo-spark-connector_2.12-3.0.1-assembly.jar'
