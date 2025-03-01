@@ -143,7 +143,7 @@ class UserSession(BaseFakeGenClass):
 		return None
 
 	def pages_visited_gen_func(self):
-		return random.sample(self._actions, random.randint(2, 6))
+		return random.sample(self._pages, random.randint(2, 6))
 
 	def device_gen_func(self):
 		if random.randint(0, 1):
@@ -232,13 +232,13 @@ class SupportTickets(BaseFakeGenClass):
 		super().__init__()
 
 	def user_id_gen_func(self):
-		return random.choices(self._user_ids)
+		return random.choice(self._user_ids)
 
 	def status_gen_func(self):
-		return random.choices(self._statuses)
+		return random.choice(self._statuses)
 
 	def issue_type_gen_func(self):
-		return random.randint(1, 10000)
+		return random.choice(self._types)
 
 	def messages_gen_func(self):
 		return [self._fake.text(50) for _ in range(1, 20)]
