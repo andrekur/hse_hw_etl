@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS "Users" (
-    user_id VARCHAR(200) PRIMARY KEY,
+    _id VARCHAR(400),
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     email VARCHAR(60),
     phone VARCHAR(14),
-    registration_date TIMESTAMP NOT NULL
+    registration_date TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS "UserSessions" (

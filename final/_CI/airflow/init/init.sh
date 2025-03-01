@@ -33,3 +33,5 @@ airflow connections add 'spark_app' \
     --conn-host 'spark://spark' \
     --conn-port ${SPARK_PORT} \
     --conn-extra '{"deploy_mode": "client"}'
+
+airflow db upgrade

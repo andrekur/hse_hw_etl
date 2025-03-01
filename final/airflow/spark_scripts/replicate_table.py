@@ -36,8 +36,9 @@ def replicate(from_db, to_db):
 		# .option('database', 'shop') \
 		# .option('collection', from_db.table) \
 
-	df.show()
+	# df.show()
 	df = df.withColumn("_id", col("_id.oid"))
+	# df.show()
 	df.write \
 		.format('jdbc') \
 		.option('url', to_db.conn_url) \
@@ -49,7 +50,7 @@ def replicate(from_db, to_db):
 		.save()
 
 	spark.stop()
-
+	# python ./scripts/replicate_table.py Users
 
 if __name__ == "__main__":
 	replicate_table = sys.argv[1] # table name get from args

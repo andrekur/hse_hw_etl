@@ -14,8 +14,9 @@ with DAG(
     schedule_interval=timedelta(days=1),
 ) as dag:
     tables = (
-        'Users', 'UserSessions', 'Products', 'ProductPriceHistory', 'SupportTickets',
-        'UserRecommendations', 'SearchQueries', 'EventLogs', 'ModerationQueue'
+        'Users',
+        #'UserSessions', 'Products', 'ProductPriceHistory', 'SupportTickets',
+        #'UserRecommendations', 'SearchQueries', 'EventLogs', 'ModerationQueue'
     )
 
     start = EmptyOperator(task_id='start')
@@ -29,8 +30,8 @@ with DAG(
             application_args=[
                 table
             ],
-            conf=DEFAULT_SPARK_SUBMIT_CONF,
-            jars=JARS
+            # conf=DEFAULT_SPARK_SUBMIT_CONF,
+            # jars=JARS
         )
 
         start >> spark_submit_task >> finish
