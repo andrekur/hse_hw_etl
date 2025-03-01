@@ -19,17 +19,17 @@ if __name__ == '__main__':
 
 	db = client['shop']
 
-	user_collection = db['User']
+	user_collection = db['Users']
 	user = User()
 	user_result = user.gen_data(1000)
 	user_ids = user_collection.insert_many(user_result).inserted_ids
 
-	u_s_collection = db['UserSession']
+	u_s_collection = db['UserSessions']
 	user_session = UserSession(user_ids)
 	session_result = user_session.gen_data(2000)
 	session_ids = u_s_collection.insert_many(session_result)
 
-	product_collection = db['Product']
+	product_collection = db['Products']
 	product = Product()
 	product_result = product.gen_data(200)
 	product_ids = product_collection.insert_many(product_result).inserted_ids

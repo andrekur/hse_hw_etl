@@ -88,7 +88,7 @@ class User(BaseFakeGenClass):
 class UserSession(BaseFakeGenClass):
 	def __init__(self, user_ids) -> None:
 		self.fields = ('user_id', 'start_time', 'end_time', 'pages_visited', 'device', 'actions',)
-		self.model_name = 'UserSession'
+		self.model_name = 'UserSessions'
 		self.colum_id = 'session_id'
 		self._user_ids = user_ids
 		self._actions = (

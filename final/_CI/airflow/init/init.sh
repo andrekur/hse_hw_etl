@@ -20,6 +20,14 @@ airflow connections add 'postgres_app' \
     --conn-port ${DB_POSTGRES_PORT} \
     --conn-schema ${DB_POSTGRES_NAME_DB}
 
+airflow connections add 'mongo_app' \
+    --conn-type 'mongo' \
+    --conn-login 'root' \
+    --conn-password 'example' \
+    --conn-host 'db_mongo' \
+    --conn-port '27017'
+
+
 airflow connections add 'spark_app' \
     --conn-type 'spark' \
     --conn-host 'spark://spark' \
