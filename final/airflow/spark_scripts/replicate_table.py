@@ -12,16 +12,15 @@ CONFIG = dotenv_values('.env')
 def replicate(from_db, to_db):
 	spark = SparkSession.builder \
 		.appName('ReplicateData') \
-		.config('spark.jars', '/opt/airflow/spark/jars/postgresql-42.2.18.jar,/opt/airflow/spark/jars/mongo-spark-connector_2.12-10.1.1.jar') \
+		.config('spark.jars', '/opt/airflow/spark/jars/postgresql-42.2.18.jar,/opt/airflow/spark/jars/mongo-spark-connector_2.13-10.4.1.jar,/opt/airflow/spark/jars/mongodb-driver-sync-4.10.2.jar') \
 		.getOrCreate()
 
 	df = spark.read \
-		.format('jdbc') \
+		.format('mongodb') \
 		.option('url', from_db.conn_url) \
 		.option('dbtable', from_db.table) \
 		.option('user', from_db.user['login']) \
 		.option('password', from_db.user['passwd']) \
-		.option('driver', from_db.driver) \
 		.load()
 
 	df.write \
@@ -50,13 +49,13 @@ if __name__ == "__main__":
 		'public'
 	)
 
-	mysql_config = ConnectionConfig(
-		{'login': CONFIG['DB_MYSQL_USER'], 'passwd': CONFIG['DB_MYSQL_PASSWORD']},
-		'mysql',
-		CONFIG['DB_MYSQL_HOST'],
-		CONFIG['DB_MYSQL_PORT'],
-		CONFIG['DB_MYSQL_NAME_DB'],
+	mongo_config = ConnectionConfig(
+		{'login': 'root', 'passwd': 'example'},
+		'mongo',
+		'db_mongo',
+		'27017',
+		'shop',
 		replicate_table,
 	)
 
-	replicate(postgres_config, mysql_config)
+	replicate(mongo_config, postgres_config)
