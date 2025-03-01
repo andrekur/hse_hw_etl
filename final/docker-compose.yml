@@ -34,11 +34,11 @@ services:
       - POSTGRES_USER=${DB_POSTGRES_USER}
       - POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
 
-  mongo:
+  db_mongo:
     build: ./_CI/db/mongo
     container_name: mongo_app
     ports:
-      - "27018:27017"
+      - "27019:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
@@ -51,7 +51,7 @@ services:
       context: ./
       dockerfile: ./_CI/generator/Dockerfile
     depends_on:
-      - db_postgresql
+      - db_mongo
 
   airflow-init:
     build:
@@ -108,6 +108,7 @@ services:
       - spark
 
 volumes:
+  mongo_data:
   postgres_data:
   airflow:
   spark:

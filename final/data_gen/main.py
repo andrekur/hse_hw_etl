@@ -5,9 +5,17 @@ from models import (
 
 from pymongo import MongoClient
 
+username = "root"
+password = "example"
+host = "mongo_app"
+port = 27017
+
+# TODO .env
+uri = f"mongodb://{username}:{password}@{host}:{port}/"
+
 
 if __name__ == '__main__':
-	client = MongoClient("mongo_app:27017/") # TODO env
+	client = MongoClient(uri) # TODO env
 
 	db = client['shop']
 
