@@ -15,8 +15,8 @@ with DAG(
 ) as dag:
     tables = (
         'Users',
-        #'UserSessions', 'Products', 'ProductPriceHistory', 'SupportTickets',
-        #'UserRecommendations', 'SearchQueries', 'EventLogs', 'ModerationQueue'
+        'UserSessions', 'Products', 'ProductPriceHistory', 'SupportTickets',
+        'UserRecommendations', 'SearchQueries', 'EventLogs', 'ModerationQueue'
     )
 
     start = EmptyOperator(task_id='start')

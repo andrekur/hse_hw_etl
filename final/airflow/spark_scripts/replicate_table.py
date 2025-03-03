@@ -8,16 +8,6 @@ from db_conn_conf import ConnectionConfig
 
 CONFIG = dotenv_values('.env')
 
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DateType
-
-# Указываем схему вручную
-schema = StructType([
-	StructField("_id", StringType(), True),
-    StructField("first_name", StringType(), True),
-    StructField("last_name", StringType(), True),
-	StructField("email", StringType(), True),
-	StructField("registration_date", DateType(), True)
-])
 
 # TODO вынести в общую функцию репликации
 def replicate(from_db, to_db):
@@ -33,12 +23,9 @@ def replicate(from_db, to_db):
 		.format('mongo') \
 		.load()
 
-		# .option('database', 'shop') \
-		# .option('collection', from_db.table) \
 
-	# df.show()
 	df = df.withColumn("_id", col("_id.oid"))
-	# df.show()
+
 	df.write \
 		.format('jdbc') \
 		.option('url', to_db.conn_url) \
@@ -50,7 +37,7 @@ def replicate(from_db, to_db):
 		.save()
 
 	spark.stop()
-	# python ./scripts/replicate_table.py Users
+
 
 if __name__ == "__main__":
 	replicate_table = sys.argv[1] # table name get from args

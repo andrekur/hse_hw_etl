@@ -1,5 +1,8 @@
+CREATE SCHEMA IF NOT EXISTS "stage";
+CREATE SCHEMA IF NOT EXISTS "cleaned";
+
 CREATE TABLE IF NOT EXISTS "Users" (
-    _id VARCHAR(400),
+    _id UUID,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     email VARCHAR(60),
@@ -8,7 +11,7 @@ CREATE TABLE IF NOT EXISTS "Users" (
 );
 
 CREATE TABLE IF NOT EXISTS "UserSessions" (
-    session_id UUID PRIMARY KEY,
+    _id UUID,
     user_id UUID NOT NULL,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP,
@@ -18,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "UserSessions" (
 );
 
 CREATE TABLE IF NOT EXISTS "Products" (
-    product_id UUID PRIMARY KEY,
+    _id UUID,
     name VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
     category_id INT NOT NULL,
@@ -26,14 +29,14 @@ CREATE TABLE IF NOT EXISTS "Products" (
 );
 
 CREATE TABLE IF NOT EXISTS "ProductPriceHistory" (
-    product_id UUID PRIMARY KEY,
+    _id UUID,
     price_changes JSONB,
     current_price NUMERIC(10, 2) NOT NULL,
     currency VARCHAR(3) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "SupportTickets" (
-    ticket_id UUID PRIMARY KEY,
+    _id UUID,
     user_id UUID NOT NULL,
     status VARCHAR(50) NOT NULL,
     issue_type VARCHAR(100) NOT NULL,
@@ -44,14 +47,14 @@ CREATE TABLE IF NOT EXISTS "SupportTickets" (
 );
 
 CREATE TABLE IF NOT EXISTS "UserRecommendations" (
-    recom_id UUID PRIMARY KEY,
+    _id UUID,
     user_id UUID NOT NULL,
     recommended_products UUID[],
     last_updated TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "SearchQueries" (
-    query_id UUID PRIMARY KEY,
+    _id UUID,
     user_id UUID NOT NULL,
     query_text TEXT NOT NULL,
     timestamp TIMESTAMP NOT NULL,
@@ -60,14 +63,14 @@ CREATE TABLE IF NOT EXISTS "SearchQueries" (
 );
 
 CREATE TABLE IF NOT EXISTS "EventLogs" (
-    event_id UUID PRIMARY KEY,
+    _id UUID,
     timestamp TIMESTAMP NOT NULL,
     event_type VARCHAR(50) NOT NULL,
     details JSONB
 );
 
 CREATE TABLE IF NOT EXISTS "ModerationQueue" (
-    review_id UUID PRIMARY KEY,
+    _id UUID,
     user_id UUID NOT NULL,
     product_id UUID NOT NULL,
     review_text TEXT NOT NULL,
