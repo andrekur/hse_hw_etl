@@ -335,7 +335,7 @@ class EventLogs(BaseFakeGenClass):
 		return dt.now() - timedelta(180) + timedelta(random.randint(1, 180))
 
 	def event_type_gen_func(self):
-		return random.sample(self._server_event_types, 1)
+		return random.choice(self._server_event_types)
 
 	def details_gen_func(self):
 		return {

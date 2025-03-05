@@ -1,40 +1,13 @@
 import sys
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, to_json
+from pyspark.sql.functions import col, to_json, struct
 from dotenv import dotenv_values
 
 from db_conn_conf import ConnectionConfig
 
 CONFIG = dotenv_values('.env')
 
-
-# TODO вынести в общую функцию репликации
-def replicate(from_db, to_db):
-
-
-	df = spark.read \
-		.format('mongo') \
-		.load()
-	
-	#python ./scripts/replicate_table.py Products Users Products 
-	#python ./scripts/replicate_table.py Users Users Products  ProductPriceHistory
-	#python ./scripts/replicate_table.py ProductPriceHistory
-	#python ./scripts/replicate_table.py UserSessions
-	# df.printSchema()
-	df = df.withColumn("_id", col("_id.oid"))
-	# df.printSchema()
-	df.write \
-		.format('jdbc') \
-		.option('url', to_db.conn_url) \
-		.option('dbtable', to_db.table) \
-		.option('user', to_db.user['login']) \
-		.option('password', to_db.user['passwd']) \
-		.option('driver', to_db.driver) \
-		.mode('overwrite') \
-		.save()
-
-	spark.stop()
 
 def replica_Users(df):
 	df = spark.read \
@@ -43,6 +16,8 @@ def replica_Users(df):
 	
 	df = df.withColumn("_id", col("_id.oid"))
 
+	return df
+
 def replica_UserSessions(df):
 	df = df.withColumn("_id", col("_id.oid"))
 	df = df.withColumn("user_id", col("user_id.oid"))
@@ -50,35 +25,66 @@ def replica_UserSessions(df):
 	df = df.withColumn("pages_visited", to_json(col("pages_visited")))
 	df = df.withColumn("actions", to_json(col("actions")))
 
-	df.printSchema()
 	return df
 
 def replica_Products(df):
 	df = df.withColumn("_id", col("_id.oid"))
 
+	return df
 
 def replica_ProductPriceHistory(df):
 	df = df.withColumn("_id", col("_id.oid"))
 	df = df.withColumn("product_id", col("product_id.oid"))
 
-	df = df.withColumn("price_changes_json", to_json(col("price_changes")))
-	df = df.drop("price_changes").withColumnRenamed("price_changes_json", "price_changes")
+	df = df.withColumn("price_changes", to_json(col("price_changes")))
 
+	return df
 
 def replica_SupportTickets(df):
-	pass
+
+	df = df.withColumn("_id", col("_id.oid"))
+	df = df.withColumn("messages", to_json(col("messages")))
+	df = df.withColumn("user_id", col("user_id.oid"))
+
+	return df
 
 def replica_UserRecommendations(df):
-	pass
+	
+	df = df.withColumn("_id", col("_id.oid"))
+	df = df.withColumn("recommended_products", to_json(col("recommended_products")))
+
+	return df
 
 def replica_SearchQueries(df):
-	pass
+
+	df = df.withColumn("_id", col("_id.oid"))
+	df = df.withColumn("user_id", col("user_id.oid"))
+
+	df = df.withColumn("filters", to_json(col("filters")))
+
+	return df
 
 def replica_EventLogs(df):
-	pass
+
+	df = df.withColumn("_id", col("_id.oid"))
+	df = df.withColumn("details",
+    	struct(
+        	col("details.user.oid").alias("user_id"),
+        	col("details.description")
+    )
+	)
+
+	df = df.withColumn("details", to_json(col("details")))
+
+	return df
 
 def replica_ModerationQueue(df):
-	pass
+
+	df = df.withColumn("_id", col("_id.oid"))
+	df = df.withColumn("user_id", col("user_id.oid"))
+	df = df.withColumn("product_id", col("product_id.oid"))
+
+	return df
 
 tables_replica_func = {
 	'Users': replica_Users,
@@ -119,7 +125,6 @@ if __name__ == "__main__":
 		.format('mongo') \
 		.load()
 
-	# replicate(mongo_config, postgres_config)
 	df = tables_replica_func[replicate_table](df)
 
 	df.write \
