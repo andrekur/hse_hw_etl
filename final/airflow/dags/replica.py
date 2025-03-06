@@ -25,7 +25,7 @@ with DAG(
     for table in tables:
         spark_submit_task = SparkSubmitOperator(
             task_id=f'replicate_{table}',
-            application='./scripts/replicate_table.py',
+            application='./scripts/replicate_table_to_stage.py',
             conn_id='spark_app',
             application_args=[
                 table

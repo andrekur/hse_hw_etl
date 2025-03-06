@@ -1,7 +1,7 @@
 import sys
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, to_json, struct
+from pyspark.sql.functions import col, to_json, struct, expr
 from dotenv import dotenv_values
 
 from db_conn_conf import ConnectionConfig
@@ -51,7 +51,11 @@ def replica_SupportTickets(df):
 def replica_UserRecommendations(df):
 	
 	df = df.withColumn("_id", col("_id.oid"))
-	df = df.withColumn("recommended_products", to_json(col("recommended_products")))
+
+	df = df.withColumn(
+		"recommended_products",
+		expr("transform(recommended_products, x -> x.oid)")
+	)
 
 	return df
 
@@ -110,7 +114,7 @@ if __name__ == "__main__":
 		CONFIG['DB_POSTGRES_PORT'],
 		CONFIG['DB_POSTGRES_NAME_DB'],
 		f'"{replicate_table}"',
-		'public'
+		'stage'
 	)
 
 	spark = SparkSession.builder \
