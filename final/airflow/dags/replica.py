@@ -4,13 +4,13 @@ from airflow import DAG
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.operators.empty import EmptyOperator
 
-from defaults import DEFAULT_ARGS, DEFAULT_SPARK_SUBMIT_CONF, JARS
+from defaults import DEFAULT_ARGS, JARS
 
 
 with DAG(
     'replicate_tables',
     default_args=DEFAULT_ARGS,
-    description='Replica from Mongo to PostgreSQL',
+    description='Replica from Mongo to PostgreSQL to stage schema',
     schedule_interval=timedelta(days=1),
 ) as dag:
     tables = (
@@ -30,7 +30,6 @@ with DAG(
             application_args=[
                 table
             ],
-            # conf=DEFAULT_SPARK_SUBMIT_CONF,
             jars=JARS
         )
 

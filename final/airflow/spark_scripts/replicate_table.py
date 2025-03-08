@@ -10,10 +10,6 @@ CONFIG = dotenv_values('.env')
 
 
 def replica_Users(df):
-	df = spark.read \
-		.format('mongo') \
-		.load()
-	
 	df = df.withColumn('_id', col('_id.oid'))
 
 	return df
@@ -102,7 +98,8 @@ TABLES_REPLICA_FUNC = {
 	'ModerationQueue': replica_ModerationQueue
 }
 
-
+MONGO_URI = f"mongodb://{CONFIG['DB_MONGO_USER']}:{CONFIG['DB_MONGO_PASSWORD']}@{CONFIG['DB_MONGO_HOST']}:{CONFIG['DB_MONGO_PORT']}/"
+DB_MONGO_NAME_DB = CONFIG['DB_MONGO_NAME_DB']
 
 if __name__ == '__main__':
 	replicate_table = sys.argv[1] # table name get from args
@@ -119,9 +116,11 @@ if __name__ == '__main__':
 
 	spark = SparkSession.builder \
 		.appName('ReplicateData') \
-		.config('spark.jars', '/opt/airflow/spark/jars/mongo-spark-connector_2.12-3.0.1-assembly.jar,\
-			/opt/airflow/spark/jars/postgresql-42.2.18.jar') \
-		.config('spark.mongodb.input.uri', f'mongodb://root:example@db_mongo:27017/shop.{replicate_table}?authSource=admin') \
+		.config('spark.jars',
+			'/opt/airflow/spark/jars/mongo-spark-connector_2.12-3.0.1-assembly.jar,'
+			'/opt/airflow/spark/jars/postgresql-42.2.18.jar'
+		) \
+		.config('spark.mongodb.input.uri', f'{MONGO_URI}{DB_MONGO_NAME_DB}.{replicate_table}?authSource=admin') \
 		.config('spark.mongodb.input.sampleSize', 100000) \
 		.getOrCreate()
 

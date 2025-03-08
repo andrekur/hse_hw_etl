@@ -42,7 +42,7 @@ if __name__ == '__main__':
 	product_result = product.gen_data(CATEGORIES_PRODUCTS)
 	product_ids = product_collection.insert_many(product_result).inserted_ids
 
-	product_p_h_collection = db['COUNT_PRODUCT_PRICE_HISTORY']
+	product_p_h_collection = db['ProductPriceHistory']
 	product_p_h = ProductPriceHistory(product_ids.copy())
 	product_p_h_result = product_p_h.gen_data(COUNT_PRODUCT_PRICE_HISTORY)
 	product_p_h_ids = product_p_h_collection.insert_many(product_p_h_result).inserted_ids

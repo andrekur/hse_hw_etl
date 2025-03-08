@@ -18,8 +18,6 @@ x-common:
     - airflow:/usr/local/airflow/db/:rw 
 
 
-
-
 services:
   db_postgresql:
     container_name: postgres_app

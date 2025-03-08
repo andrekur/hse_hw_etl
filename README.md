@@ -1,1 +1,47 @@
 # hse_hw_etl
+Финальная работа по ETL by **andrekur**
+
+## Установка
+```
+git clone https://github.com/andrekur/hse_hw_etl.git
+cd hse_hw_etl/final
+mv env.example .env
+sudo docker-compose up -d
+```
+
+В ```.env``` файле прописаны все порты и конфигурация проекта.
+
+## Витрины
+Каждая витрина представлена отдельным файлом по пути: ```./airflow/spark_scripts/calc_{название_витрины}.py```
+
+Для каждой витрины сформирован отдельный даг по пути: <br>```./airflow/dags/{название_витрины}.py```
+
+#TODO
+СДЕЛАТЬ ДВЕ ВИТРИНЫ
+
+## Репликация из Mongo в Postgresql
+
+Даг для репликации представлен по пути: <br>```./airflow/dags/replica.py```
+
+
+Скрипт для репликации представлен по пути: <br>
+```./airflow/spark_scripts/replicate_table.py```
+
+
+## Генерация данных для целевой БД
+Скрипт для генерации данных для Mongo представлен по пути: <br>
+```./data_gen/main.py```
+<br>
+В ```.env``` можно конфигурировать размер гененируемых данных
+
+
+
+## Контейнера
+1. **Mongo** - целевая БД
+2. **PostgreSQL** - БД в которую реплецируем из целевой
+3. **data_gen** - генерация данных для целевой БД
+4. **airflow-init** - первичный запуск airflow и настройка
+5. **airflow-webserver** - админка для airflow
+6. **airflow-scheduler** - запуск по расписанию для airflow
+7. **spark** - мастер для спарка
+8. **spark-worker** - воркеры для спарка

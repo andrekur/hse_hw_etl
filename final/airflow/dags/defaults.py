@@ -11,9 +11,4 @@ DEFAULT_ARGS = {
     'catchup': False
 }
 
-DEFAULT_SPARK_SUBMIT_CONF = {
-	'spark.driver.memory': '600m',
-	'spark.executor.memory': '600m'
-}
-
 JARS = './spark/jars/postgresql-42.2.18.jar,./spark/jars/mongo-spark-connector_2.12-3.0.1-assembly.jar'

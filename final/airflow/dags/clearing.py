@@ -10,7 +10,7 @@ from defaults import DEFAULT_ARGS, JARS
 with DAG(
     'clearing_tables',
     default_args=DEFAULT_ARGS,
-    description='Clearing PostgreSQL tables',
+    description='Clearing PostgreSQL tables to cleaned schema',
     schedule_interval=timedelta(days=1),
 ) as dag:
     tables = (
@@ -30,7 +30,6 @@ with DAG(
             application_args=[
                 table
             ],
-            # conf=DEFAULT_SPARK_SUBMIT_CONF,
             jars=JARS
         )
 
