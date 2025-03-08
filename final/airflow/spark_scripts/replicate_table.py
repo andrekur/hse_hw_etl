@@ -14,79 +14,79 @@ def replica_Users(df):
 		.format('mongo') \
 		.load()
 	
-	df = df.withColumn("_id", col("_id.oid"))
+	df = df.withColumn('_id', col('_id.oid'))
 
 	return df
 
 def replica_UserSessions(df):
-	df = df.withColumn("_id", col("_id.oid"))
-	df = df.withColumn("user_id", col("user_id.oid"))
+	df = df.withColumn('_id', col('_id.oid'))
+	df = df.withColumn('user_id', col('user_id.oid'))
 
-	df = df.withColumn("pages_visited", to_json(col("pages_visited")))
-	df = df.withColumn("actions", to_json(col("actions")))
+	df = df.withColumn('pages_visited', to_json(col('pages_visited')))
+	df = df.withColumn('actions', to_json(col('actions')))
 
 	return df
 
 def replica_Products(df):
-	df = df.withColumn("_id", col("_id.oid"))
+	df = df.withColumn('_id', col('_id.oid'))
 
 	return df
 
 def replica_ProductPriceHistory(df):
-	df = df.withColumn("_id", col("_id.oid"))
-	df = df.withColumn("product_id", col("product_id.oid"))
+	df = df.withColumn('_id', col('_id.oid'))
+	df = df.withColumn('product_id', col('product_id.oid'))
 
-	df = df.withColumn("price_changes", to_json(col("price_changes")))
+	df = df.withColumn('price_changes', to_json(col('price_changes')))
 
 	return df
 
 def replica_SupportTickets(df):
 
-	df = df.withColumn("_id", col("_id.oid"))
-	df = df.withColumn("messages", to_json(col("messages")))
-	df = df.withColumn("user_id", col("user_id.oid"))
+	df = df.withColumn('_id', col('_id.oid'))
+	df = df.withColumn('messages', to_json(col('messages')))
+	df = df.withColumn('user_id', col('user_id.oid'))
 
 	return df
 
 def replica_UserRecommendations(df):
 	
-	df = df.withColumn("_id", col("_id.oid"))
+	df = df.withColumn('_id', col('_id.oid'))
 
 	df = df.withColumn(
-		"recommended_products",
-		expr("transform(recommended_products, x -> x.oid)")
+		'recommended_products',
+		expr('transform(recommended_products, x -> x.oid)')
 	)
 
 	return df
 
 def replica_SearchQueries(df):
 
-	df = df.withColumn("_id", col("_id.oid"))
-	df = df.withColumn("user_id", col("user_id.oid"))
+	df = df.withColumn('_id', col('_id.oid'))
+	df = df.withColumn('user_id', col('user_id.oid'))
 
-	df = df.withColumn("filters", to_json(col("filters")))
+	df = df.withColumn('filters', to_json(col('filters')))
 
 	return df
 
 def replica_EventLogs(df):
 
-	df = df.withColumn("_id", col("_id.oid"))
-	df = df.withColumn("details",
+	df = df.withColumn('_id', col('_id.oid'))
+	df = df.withColumn('details',
     	struct(
-        	col("details.user.oid").alias("user_id"),
-        	col("details.description")
+        	col('details.user.oid').alias('user_id'),
+        	col('details.description')
     )
 	)
 
-	df = df.withColumn("details", to_json(col("details")))
+	df = df.withColumn('details', to_json(col('details')))
 
 	return df
 
 def replica_ModerationQueue(df):
 
-	df = df.withColumn("_id", col("_id.oid"))
-	df = df.withColumn("user_id", col("user_id.oid"))
-	df = df.withColumn("product_id", col("product_id.oid"))
+	df = df.withColumn('_id', col('_id.oid'))
+	df = df.withColumn('user_id', col('user_id.oid'))
+	df = df.withColumn('product_id', col('product_id.oid'))
 
 	return df
 
@@ -104,7 +104,7 @@ TABLES_REPLICA_FUNC = {
 
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	replicate_table = sys.argv[1] # table name get from args
 
 	postgres_config = ConnectionConfig(
@@ -121,8 +121,8 @@ if __name__ == "__main__":
 		.appName('ReplicateData') \
 		.config('spark.jars', '/opt/airflow/spark/jars/mongo-spark-connector_2.12-3.0.1-assembly.jar,\
 			/opt/airflow/spark/jars/postgresql-42.2.18.jar') \
-		.config("spark.mongodb.input.uri", f"mongodb://root:example@db_mongo:27017/shop.{replicate_table}?authSource=admin") \
-		.config("spark.mongodb.input.sampleSize", 100000) \
+		.config('spark.mongodb.input.uri', f'mongodb://root:example@db_mongo:27017/shop.{replicate_table}?authSource=admin') \
+		.config('spark.mongodb.input.sampleSize', 100000) \
 		.getOrCreate()
 
 	df = spark.read \
@@ -142,4 +142,3 @@ if __name__ == "__main__":
 		.save()
 
 	spark.stop()
-
