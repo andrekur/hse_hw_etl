@@ -27,21 +27,21 @@ services:
     restart: always
     ports:
       - ${DB_POSTGRES_PORT_IN}:${DB_POSTGRES_PORT_OUT}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_DB=${DB_POSTGRES_NAME_DB}
       - POSTGRES_USER=${DB_POSTGRES_USER}
       - POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
 
   db_mongo:
     build: ./_CI/db/mongo
     container_name: mongo_app
     ports:
-      - "27019:27017"
+      - ${DB_MONGO_PORT_IN}:${DB_MONGO_PORT_OUT}
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      - MONGO_INITDB_ROOT_USERNAME=${DB_MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_MONGO_PASSWORD}
     volumes:
       - mongo_data:/data/db
 

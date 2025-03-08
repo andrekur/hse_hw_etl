@@ -22,10 +22,10 @@ airflow connections add 'postgres_app' \
 
 airflow connections add 'mongo_app' \
     --conn-type 'mongo' \
-    --conn-login 'root' \
-    --conn-password 'example' \
-    --conn-host 'db_mongo' \
-    --conn-port '27017'
+    --conn-login ${DB_MONGO_USER} \
+    --conn-password ${DB_MONGO_PASSWORD} \
+    --conn-host ${DB_MONGO_HOST} \
+    --conn-port ${DB_MONGO_PORT}
 
 
 airflow connections add 'spark_app' \
