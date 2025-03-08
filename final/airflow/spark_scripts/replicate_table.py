@@ -90,7 +90,7 @@ def replica_ModerationQueue(df):
 
 	return df
 
-tables_replica_func = {
+TABLES_REPLICA_FUNC = {
 	'Users': replica_Users,
 	'UserSessions': replica_UserSessions,
 	'Products': replica_Products,
@@ -129,7 +129,7 @@ if __name__ == "__main__":
 		.format('mongo') \
 		.load()
 
-	df = tables_replica_func[replicate_table](df)
+	df = TABLES_REPLICA_FUNC[replicate_table](df)
 
 	df.write \
 		.format('jdbc') \
