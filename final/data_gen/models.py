@@ -46,7 +46,7 @@ class User(BaseFakeGenClass):
 		return self._fake.email()
 
 	def phone_gen_func(self):
-		return self._fake.phone_number()[:10]
+		return '1' + self._fake.phone_number()[:random.randint(12, 16)]
 
 	def registration_date_gen_func(self):
 		return self._fake.date_time_between(start_date=date(2022, 1, 1), end_date=date(2023, 1, 1))
