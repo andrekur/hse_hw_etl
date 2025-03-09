@@ -51,9 +51,9 @@ sudo docker-compose up -d
 ```./airflow/spark_scripts/replicate_table.py```
 
 Очистка
-1. Даг <br>```./airflow/dags/replica.py```
+1. Даг <br>```./airflow/dags/clearing.py```
 2. Скрипт <br>
-```./airflow/spark_scripts/replicate_table.py```
+```./airflow/spark_scripts/clearing_table.py```
 
 ## Генерация данных для целевой БД
 Скрипт для генерации данных для Mongo представлен по пути: <br>
