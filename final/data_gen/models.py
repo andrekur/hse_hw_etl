@@ -210,7 +210,7 @@ class SupportTickets(BaseFakeGenClass):
 		return [self._fake.text(50) for _ in range(1, 20)]
 
 	def created_at_gen_func(self):
-		return dt.now() - timedelta(365) + timedelta(random.randint(1, 15))
+		return dt.now() - timedelta(365) + timedelta(random.randint(1, 300))
 
 	def end_date_gen_func(self):
 		return None
