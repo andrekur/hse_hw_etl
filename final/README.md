@@ -39,12 +39,21 @@ sudo docker-compose up -d
 
 ## Репликация из Mongo в Postgresql
 
-Даг для репликации представлен по пути: <br>```./airflow/dags/replica.py```
 
+**Схемы в Postgresql**
+1. stage - сырые, данные, с минимальной очисткой
+2. cleaned - чистые данные
+3. data_marts - витрины
 
-Скрипт для репликации представлен по пути: <br>
+Репликация
+1. Даг <br>```./airflow/dags/replica.py```
+2. Скрипт <br>
 ```./airflow/spark_scripts/replicate_table.py```
 
+Очистка
+1. Даг <br>```./airflow/dags/replica.py```
+2. Скрипт <br>
+```./airflow/spark_scripts/replicate_table.py```
 
 ## Генерация данных для целевой БД
 Скрипт для генерации данных для Mongo представлен по пути: <br>
